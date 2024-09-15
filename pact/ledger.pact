@@ -42,6 +42,9 @@
   ; Maximum tiemeout in days => 10 years
   (defconst MAXIMUM-TIMEOUT:decimal (days (* 10.0 365.25)))
 
+  ; Maximum URI length
+  (defconst MAXIMUM-URI-LENGTH:integer 1024)
+
   ;-----------------------------------------------------------------------------
   ; Events
   ;-----------------------------------------------------------------------------
@@ -290,9 +293,13 @@
                             policies:[module{token-policy-ng-v1}]
                             creation-guard:guard)
     @doc "Create a token with a given token-id"
-    ; First we verify that the token-id is correct, regarding the uti and the
-    ; creation gyard
+    ; First we validate the length of the URI
+    (enforce (and? (< 0) (>= MAXIMUM-URI-LENGTH) (length uri)) "URI length is invalid")
+
+    ; Then we verify that the token-id is correct, regarding the URI and the
+    ; creation guard
     (enforce-token-reserved id uri creation-guard)
+
     (let* ((_policies (sort-policies policies))
            (token-info {'id:id, 'uri:uri, 'precision:precision, 'supply:0.0})
            (call-policy (lambda (m:module{token-policy-ng-v1})

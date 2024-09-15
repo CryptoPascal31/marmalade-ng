@@ -31,6 +31,16 @@
   (create-token "t:bad" 1 "http://token-1"
                 [marmalade-ng.policy-events-A, marmalade-ng.policy-events-B] (read-keyset 'create-ks)))
 
+; Try to create with bad URI
+(expect-failure "Zero length URI" "URI length is invalid"
+                (create-token "t:r-4jQUrZWpYfEqq_iGvBn1ofgCLPoh2ZfG5kfAVX2KM" 1 ""
+                              [marmalade-ng.policy-events-A, marmalade-ng.policy-events-B] (read-keyset 'create-ks)))
+
+(expect-failure "Zero length URI" "URI length is invalid"
+                (create-token "t:r-4jQUrZWpYfEqq_iGvBn1ofgCLPoh2ZfG5kfAVX2KM" 1 (concat (make-list 1025 "a"))
+                              [marmalade-ng.policy-events-A, marmalade-ng.policy-events-B] (read-keyset 'create-ks)))
+
+
 ; Now try with evrything good
 (env-events true)
 (create-token "t:r-4jQUrZWpYfEqq_iGvBn1ofgCLPoh2ZfG5kfAVX2KM" 1 "http://token-1"
