@@ -18,6 +18,7 @@
     max-size:integer
     creator:string
     creator-guard:guard
+    uri:string
   )
 
   (deftable collections:{collection-sch})
@@ -45,9 +46,20 @@
     @event
     (with-read collections collection-id {'creator-guard:=cg}
       (enforce-guard cg))
-  true)
+  )
 
-  (defcap CREATE-COLLECTION (collection-id:string collection-name:string collection-size:integer creator:string )
+  (defcap UPDATE-COLLECTION (collection-id:string)
+    @doc "Update collection (for now only URI whenever it's possible)"
+    (with-read collections collection-id {'creator-guard:=cg}
+      (enforce-guard cg))
+  )
+
+
+  (defcap CREATE-COLLECTION (collection-id:string collection-name:string collection-size:integer creator:string)
+    @event
+    true)
+
+  (defcap COLLECTION-URI (collection-id:string uri:string)
     @event
     true)
 
@@ -61,6 +73,22 @@
   ; of tokens.
   (defconst UNLIMITED-SIZE:integer 0)
 
+  ; Null URI
+  (defconst NULL-URI:string "")
+
+  ; Maximum URI length
+  (defconst MAXIMUM-URI-LENGTH:integer 1024)
+
+  ;-----------------------------------------------------------------------------
+  ; Util functions
+  ;-----------------------------------------------------------------------------
+  (defun enforce-valid-uri:bool (uri:string)
+    (enforce (compose (length) (>= MAXIMUM-URI-LENGTH) uri) "URI length invalid"))
+
+  (defun enforce-valid-uri-not-null:bool (uri:string)
+    (enforce (!= NULL-URI uri) "URI must be not NULL")
+    (enforce-valid-uri uri))
+
   ;-----------------------------------------------------------------------------
   ; Collection creation
   ;-----------------------------------------------------------------------------
@@ -68,6 +96,11 @@
     (format "c_{}_{}" [name, (hash {'n:name, 'g:creator-guard})]))
 
   (defun create-collection:bool (id:string name:string size:integer creator:string creator-guard:guard)
+    @doc "Create a collection without an URI"
+    (create-collection-with-uri id name size creator creator-guard NULL-URI))
+
+  (defun create-collection-with-uri:bool (id:string name:string size:integer creator:string creator-guard:guard uri:string)
+    @doc "Create a collection with an URI"
     (enforce (or? (= UNLIMITED-SIZE)
                   (and? (< 0) (>= MAXIMUM-SIZE)) size)
              (format "Collection size must be positive and less than {}" [MAXIMUM-SIZE]))
@@ -75,16 +108,40 @@
     (enforce-reserved creator creator-guard)
     ; Verify the creator guard / signature
     (enforce-guard creator-guard)
-
+    ; Verify the URI
+    (enforce-valid-uri uri)
+    ; Verify the collection ID
     (enforce (= id (create-collection-id name creator-guard)) "Collection ID does not match")
     (insert collections id {'id:id,
                             'name:name,
                             'max-size:size,
                             'size:0,
                             'creator:creator,
-                            'creator-guard:creator-guard})
-
+                            'creator-guard:creator-guard,
+                            'uri:uri})
     (emit-event (CREATE-COLLECTION id name size creator))
+
+    ; Emit the URI event in case the URI has been set
+    (if (!= NULL-URI uri)
+        (emit-event (COLLECTION-URI id uri))
+        true)
+  )
+
+  (defun set-uri:bool (id:string new-uri:string)
+    @doc "Set the URI if it was not previously supplied"
+    (with-capability (UPDATE-COLLECTION id)
+      ; Verify the URI
+      (enforce-valid-uri-not-null new-uri)
+
+      ; Check that the collection URI was not previously supplied
+      (with-read collections id {'uri:=old-uri}
+        (enforce (= old-uri NULL-URI) "Collection URI is immutable"))
+
+      ; Emit the event
+      (emit-event (COLLECTION-URI id new-uri))
+      ; And update the table
+      (update collections id {'uri:new-uri}))
+    true
   )
 
   ;-----------------------------------------------------------------------------

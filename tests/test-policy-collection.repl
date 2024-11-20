@@ -14,7 +14,8 @@
 
 (env-data {'dogs-ks:["dogs-owner-key"],
            'cats-ks:["cats-owner-key"],
-           'pigs-ks:["pigs-owner-key"]})
+           'pigs-ks:["pigs-owner-key"],
+           'rabbits-ks:["rabbits-owner-key"]})
 
 ; Create a defined keysit to test Pigs
 (namespace "user")
@@ -32,6 +33,9 @@
 
 (print (+ "BigPigs Collection ID: => "
           (create-collection-id "BigsPigs" (keyset-ref-guard "user.PigsLover"))))
+
+(print (+ "Rabbits Collection ID: => "
+          (create-collection-id "Rabbits" (read-keyset 'rabbits-ks))))
 
 ; try to create without signature
 (expect-failure "No keys" "Keyset failure"
@@ -78,6 +82,16 @@
 (create-collection "c_SmallPigs_OpMyaBMEuVD9flzeMZ7gHNk2xEH3HU8yDGib4w3S5gs" "SmallPigs" UNLIMITED-SIZE "r:user.PigsLover" (keyset-ref-guard "user.PigsLover"))
 
 (create-collection "c_BigsPigs_lZnDio-8EqbWxznH2r0v7q1iB_QRjfSWFrBp9Xj-Prc" "BigsPigs" UNLIMITED-SIZE "r:user.PigsLover" (keyset-ref-guard "user.PigsLover"))
+
+
+
+; Create with URI with Rabbits collection
+(env-sigs [{'key:"rabbits-owner-key", 'caps:[]}])
+(env-events true)
+(create-collection-with-uri "c_Rabbits_7ipiEeThCviYd9BFKo6gZwfW4XR-mLdDHHPicjl4x9Y" "Rabbits" UNLIMITED-SIZE "RabbitsLover"  (read-keyset 'rabbits-ks)
+                            "https://rabbits-online.net/rabbits.json")
+(ev-analyzer.store (env-events true))
+(expect "Event COLLECTION-URI" true (ev-analyzer.is-present "COLLECTION-URI"))
 
 (commit-tx)
 
@@ -169,6 +183,7 @@
 (expect-that "Get all collections" (compose (sort) (= ["c_BigsPigs_lZnDio-8EqbWxznH2r0v7q1iB_QRjfSWFrBp9Xj-Prc",
                                                        "c_Cats_ZMLLJuSq0JoHSR4f_ZgUa2H_p7Rr71CN8CjQ7ZL_hU0",
                                                        "c_Dogs_8BRJPRYtqM-2w8ASMYq6Toq4PIvhws-kHh0nbYfT1iY",
+                                                       "c_Rabbits_7ipiEeThCviYd9BFKo6gZwfW4XR-mLdDHHPicjl4x9Y",
                                                        "c_SmallPigs_OpMyaBMEuVD9flzeMZ7gHNk2xEH3HU8yDGib4w3S5gs"]))
              (get-all-collections))
 
@@ -207,3 +222,43 @@
 (expect "cat1 is rank 1" 1 (get-token-rank-in-collection "t:8UUtZdQJTomKPposMzgKLIyr-kXzwVRbUiRnk6ll1GQ"))
 (expect "cat2 is rank 1" 2 (get-token-rank-in-collection "t:FiEymgltFYwVdXtWJsVlYp_7h7eg6t6fzwqLjZv1_lM"))
 (expect "cat3 is rank 1" 3 (get-token-rank-in-collection "t:MkWmoRRFNCDhqPRn7XQ1U0CVuJ01Sb8XAXfrS7H47OI"))
+(commit-tx)
+
+
+; Test Collections URIs
+(begin-tx)
+(use marmalade-ng.policy-collection)
+
+; First check some URIs
+; Dogs has no URI
+(expect-that "No URI for dogs" (compose (at 'uri) (= "")) (get-collection "c_Dogs_8BRJPRYtqM-2w8ASMYq6Toq4PIvhws-kHh0nbYfT1iY"))
+; But Rabbits has an uri
+(expect-that "An URI for rabbits" (compose (at 'uri) (= "https://rabbits-online.net/rabbits.json")) (get-collection "c_Rabbits_7ipiEeThCviYd9BFKo6gZwfW4XR-mLdDHHPicjl4x9Y"))
+
+; Try to change the URI of dogs without signature
+(expect-failure "Without signature" "Keyset failure"
+  (set-uri "c_Dogs_8BRJPRYtqM-2w8ASMYq6Toq4PIvhws-kHh0nbYfT1iY"  "https://dogs-online.net/dogs.json"))
+
+; With signture
+(env-sigs [{'key:"dogs-owner-key", 'caps:[(UPDATE-COLLECTION "c_Dogs_8BRJPRYtqM-2w8ASMYq6Toq4PIvhws-kHh0nbYfT1iY")]}])
+
+(env-events true)
+(set-uri "c_Dogs_8BRJPRYtqM-2w8ASMYq6Toq4PIvhws-kHh0nbYfT1iY"  "https://dogs-online.net/dogs.json")
+(ev-analyzer.store (env-events true))
+(expect "Event COLLECTION-URI" true (ev-analyzer.is-present "COLLECTION-URI"))
+
+
+; Now Dogs has an URI
+(expect-that "No URI for dogs" (compose (at 'uri) (= "https://dogs-online.net/dogs.json")) (get-collection "c_Dogs_8BRJPRYtqM-2w8ASMYq6Toq4PIvhws-kHh0nbYfT1iY"))
+
+; Try to change it again
+(env-sigs [{'key:"dogs-owner-key", 'caps:[(UPDATE-COLLECTION "c_Dogs_8BRJPRYtqM-2w8ASMYq6Toq4PIvhws-kHh0nbYfT1iY")]}])
+(expect-failure "Immutable URI" "Collection URI is immutable"
+  (set-uri "c_Dogs_8BRJPRYtqM-2w8ASMYq6Toq4PIvhws-kHh0nbYfT1iY"  "https://new-dogs-online.net/new-dogs.json"))
+
+; Try to change Rabbits
+(env-sigs [{'key:"rabbits-owner-key", 'caps:[(UPDATE-COLLECTION "c_Rabbits_7ipiEeThCviYd9BFKo6gZwfW4XR-mLdDHHPicjl4x9Y")]}])
+(expect-failure "Immutable URI" "Collection URI is immutable"
+  (set-uri "c_Rabbits_7ipiEeThCviYd9BFKo6gZwfW4XR-mLdDHHPicjl4x9Y"  "https://new-rabbits-online.net/new-rabbits.json"))
+
+  (commit-tx)

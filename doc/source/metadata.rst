@@ -2,7 +2,16 @@
 
 Marmalade NG Metadata
 =====================
-The URI of a token (as retrieved by :ref:`LEDGER-GET-URI`) must point to a JSON off-chain Metadata Object.
+
+General considerations
+----------------------
+
+Metadata can be attached using externals URI:
+
+* to tokens through the ledger: **Mandatory** (retrieved by :ref:`LEDGER-GET-URI`)
+* to collections through the collection policy : **Optional** (retrieved by :ref:`POLICY-COLLECTION_GET-COLLECTION`)
+
+URIs must point to a JSON off-chain Metadata Object.
 
 It is highly recommended to only store metadata (and NFTs related content like images) in reliable, immutable and long term storage.
 As such URI starting with ``https://`` or ``http://`` must be avoided. And Marketplaces should tag these NFTs as unsafe.
@@ -17,6 +26,9 @@ The 2 available options for NFT storage are either:
 **In case of IPFS, the URI must not include an `https` gateway.**: Only the raw CID prefixed by ``ipfs://`` must be present.
 
 Note that the reference implementation of Marmalade NG: (https://explorer.marmalade-ng.xyz) supports in native ipfs and kdafs.
+
+Token metadata
+--------------
 
 Specification
 ~~~~~~~~~~~~~
@@ -104,3 +116,83 @@ Example
 
 .. literalinclude:: ../../examples/metadata/meta_example.json
    :language: json
+
+
+
+.. _METADATA_COLLECTIONS:
+
+Collection metadata
+-------------------
+Specification
+~~~~~~~~~~~~~
+
+.. list-table:: JSON Metadata
+  :widths: 25 15 60
+  :header-rows: 1
+
+  * - Field Name
+    - Data Type
+    - Description
+
+  * - name
+    - string
+    - The name of the collection.
+
+  * - description
+    - string
+    - The description of the collection.
+
+  * - image
+    - string
+    - | A URI pointing to a resource with mime type image/* that represents the collection,
+      | typically displayed as a profile picture for the collection.
+
+  * - banner_image
+    - string
+    - | A URI pointing to a resource with mime type image/* that represents the collection,
+      | displayed as a banner image for the collection.
+
+  * - featured_image
+    - string
+    - | A URI pointing to a resource with mime type image/* that represents the collection,
+      | typically used for a highlight section.
+
+  * - external_link
+    - string
+    - The external link of the collection.
+
+  * - | properties
+      | *(Optional, see below)*
+    - object
+    - Arbitrary properties. Values may be strings, numbers, object or arrays.
+
+
+
+.. list-table:: JSON Metadata (properties object)
+  :widths: 25 15 60
+  :header-rows: 1
+
+  * - Field Name
+    - Data Type
+    - Description
+
+  * - | authors
+      | *(Optional)*
+    - array of objects
+    - | An array of authors who created or contributed to the asset. Each author
+      | is an object with a *name* field specifying the author's name.
+
+  * - | Other optional fields
+      | *(Optional)*
+    - Depends
+    - Any fields can be added here as required by the collection author.
+
+
+JSON Schema
+~~~~~~~~~~~
+.. literalinclude:: ../../metadata/collection-meta-schema-v1.json
+   :language: json
+
+
+Example
+~~~~~~~

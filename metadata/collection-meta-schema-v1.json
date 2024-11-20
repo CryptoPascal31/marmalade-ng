@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://marmalade-ng/collection-meta-schema-v1.json",
+  "title": "Marmalade NG Collection Metadata",
+  "description": "Schema for Marmalade-NG collection Metadata",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the collection."
+    },
+    "description": {
+      "type": "string",
+      "description": "The description of the collection."
+    },
+    "family": {
+      "type": "string",
+      "description": "Specifying the larger category or group to which the collection belongs"
+    },
+    "image": {
+      "type": "string",
+      "format": "uri",
+      "description": "A URI pointing to a resource with mime type image/* that represents the collection, typically displayed as a profile picture for the collection."
+    },
+    "banner_image": {
+      "type": "string",
+      "format": "uri",
+      "description": "A URI pointing to a resource with mime type image/* that represents the collection, displayed as a banner image for the collection."
+    },
+    "featured_image": {
+      "type": "string",
+      "format": "uri",
+      "description": "A URI pointing to a resource with mime type image/* that represents the featured image for the collection, typically used for a highlight section."
+    },
+    "external_link": {
+      "type": "string",
+      "format": "uri",
+      "description": "The external link of the collection."
+    },
+    "properties": {
+      "type": "object",
+      "description": "Arbitrary properties. Values may be strings, numbers, object or arrays",
+      "properties": {
+        "authors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "An array of authors who created or contributed to the asset.",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The author's name."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+}

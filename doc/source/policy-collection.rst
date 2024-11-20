@@ -56,6 +56,18 @@ won't be diluted in a larger collection than they expect.
 The special value: ``UNLIMITED-SIZE`` (currently defined to ``0``) can be used to
 create unlimited collection.
 
+URI and Metadata
+~~~~~~~~~~~~~~~~
+It's optionally possible to attach Metadata to a collection using an URI. The URI
+must point to a JSON resource following this standard: :ref:`METADATA_COLLECTIONS`.
+
+In this case the collection has to be created using `create-collection-with-uri` instead
+of `create-collection`.
+
+If the collection has been created without an URI, or a blank URI, it's still possible
+to set up the URI
+
+
 
 Implemented hooks
 ^^^^^^^^^^^^^^^^^
@@ -114,8 +126,43 @@ If *size* is ``UNLIMITED-SIZE`` (currently defined to ``0``), the collection is 
                       "PrettyKitties" 112 "r:user.pretty-kitties-owner"
                       (keyset-ref-guard "user.pretty-kitties-owner"))
 
+
+create-collection-with-uri
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*id* ``string`` *name* ``string`` *size* ``integer`` *creator* ``string`` *creator-guard* ``guard`` *uri* ``string`` *→* ``bool``
+
+Create and register a collection with aa metadata URI.
+
+The creator guard will be enforced.
+
+*size* is the maximum number of tokens that can be contained in the collection.
+If *size* is ``UNLIMITED-SIZE`` (currently defined to ``0``), the collection is unlimited.
+
+.. code:: lisp
+
+  (use marmalade-ng.policy-collection)
+  (create-collection "c_PrettyKitties_e8XfSKUAM1fZ8HkaM1FqaYIc6v-xPUF1S2qyzz6vqQs"
+                      "PrettyKitties" 112 "r:user.pretty-kitties-owner"
+                      (keyset-ref-guard "user.pretty-kitties-owner"
+                      "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi" ))
+
+
+set-uri
+~~~~~~~
+*id* ``string`` *uri* ``string`` *→* ``bool``
+
+Set the URI if it was not previously supplied.
+
+.. code:: lisp
+
+  (use marmalade-ng.policy-collection)
+  (set-uri "c_PrettyKitties_e8XfSKUAM1fZ8HkaM1FqaYIc6v-xPUF1S2qyzz6vqQs"
+           "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi")
+
 View functions
 ^^^^^^^^^^^^^^
+.. _POLICY-COLLECTION_GET-COLLECTION:
+
 get-collection
 ~~~~~~~~~~~~~~
 *collection-id* ``string`` *→* ``object{collection-sch}``
@@ -135,7 +182,8 @@ Get collection details from a collection-id.
    "id": "c_Cats_ZMLLJuSq0JoHSR4f_ZgUa2H_p7Rr71CN8CjQ7ZL_hU0",
    "max-size": 0,
    "name": "Cats",
-   "size": 3
+   "size": 3,
+   "uri":""
   }
 
 .. _POLICY-COLLECTION-GET-TOKEN-COLLECTION:
@@ -159,7 +207,8 @@ Get collection details of a token.
    "id": "c_Cats_ZMLLJuSq0JoHSR4f_ZgUa2H_p7Rr71CN8CjQ7ZL_hU0",
    "max-size": 0,
    "name": "Cats",
-   "size": 3
+   "size": 3,
+   "uri": ""
   }
 
 get-all-collections
@@ -196,7 +245,8 @@ Return the list of all collection objects owned by a creator.
      "id": "c_Cats_ZMLLJuSq0JoHSR4f_ZgUa2H_p7Rr71CN8CjQ7ZL_hU0",
      "max-size": 0,
      "name": "Cats",
-     "size": 3
+     "size": 3,
+     "uri": ""
     },
     {"creator": "k:1caa4f5f12ea490f8f020734ed08be1926f290855818e19abfaf6dc8d03ce798",
      "creator-guard": KeySet {keys: ["1caa4f5f12ea490f8f020734ed08be1926f290855818e19abfaf6dc8d03ce798"],
@@ -204,7 +254,8 @@ Return the list of all collection objects owned by a creator.
      "id": "c_WildCats_G_X53tGkoawB8WDvJdTvlMG_VWmHeYZVieS-n5DUi9U",
      "max-size": 0,
      "name": "WildCats",
-     "size": 3
+     "size": 3,
+     "uri": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
     }]
 
 
@@ -269,9 +320,20 @@ CREATE-COLLECTION
 
 Emitted when a collection is created.
 
+COLLECTION-URI
+~~~~~~~~~~~~~~
+*uri* ``string``
+
+Emitted when the URI of collection is set.
 
 ADD-TO-COLLECTION
 ~~~~~~~~~~~~~~~~~
 *collection-id* ``string`` *token-id* ``string``
 
 Emitted when a token is added to a collection.
+
+UPDATE-COLLECTION
+~~~~~~~~~~~~~~~~~
+*collection-id* ``string``
+
+Update collection data. Currently only the URI can only be updated if it hasn't be set before.
