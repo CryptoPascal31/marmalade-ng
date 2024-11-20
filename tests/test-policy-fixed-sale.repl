@@ -85,6 +85,7 @@
 (expect "Event FIXED-SALE-OFFER -> sale_id" (hash "fixed-sale-1") (ev-analyzer.param "FIXED-SALE-OFFER" 0))
 (expect "Event FIXED-SALE-OFFER -> token_id" "t:r-4jQUrZWpYfEqq_iGvBn1ofgCLPoh2ZfG5kfAVX2KM" (ev-analyzer.param "FIXED-SALE-OFFER" 1))
 (expect "Event FIXED-SALE-OFFER -> price" 5.0 (ev-analyzer.param "FIXED-SALE-OFFER" 2))
+(expect "Event FIXED-SALE-OFFER -> curency" "coin" (ev-analyzer.param "FIXED-SALE-OFFER" 3))
 
 (expect-that "It should exist 1 active sale" (compose (length) (= 1)) (get-all-active-sales))
 (expect-that "It should exist 1 active sale" (compose (length) (= 1)) (get-sales-for-token "t:r-4jQUrZWpYfEqq_iGvBn1ofgCLPoh2ZfG5kfAVX2KM"))
@@ -158,6 +159,8 @@
 (expect "Event FIXED-SALE-BOUGHT has been emitted" true (ev-analyzer.is-present "FIXED-SALE-BOUGHT"))
 (expect "Event FIXED-SALE-BOUGHT -> sale_id" (hash "fixed-sale-1") (ev-analyzer.param "FIXED-SALE-BOUGHT" 0))
 (expect "Event FIXED-SALE-BOUGHT -> token_id" "t:r-4jQUrZWpYfEqq_iGvBn1ofgCLPoh2ZfG5kfAVX2KM" (ev-analyzer.param "FIXED-SALE-BOUGHT" 1))
+(expect "Event FIXED-SALE-BOUGHT -> price" 5.0 (ev-analyzer.param "FIXED-SALE-BOUGHT" 2))
+(expect "Event FIXED-SALE-BOUGHT -> curency" "coin" (ev-analyzer.param "FIXED-SALE-BOUGHT" 3))
 
 
 ; Check the KDA balances

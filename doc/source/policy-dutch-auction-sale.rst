@@ -236,14 +236,14 @@ Events
 ^^^^^^
 DUTCH-AUCTION-SALE-OFFER
 ~~~~~~~~~~~~~~~~~~~~~~~~
-sale-id* ``string`` *token-id* ``string`` *start-price* ``decimal``
+sale-id* ``string`` *token-id* ``string`` *start-price* ``decimal`` *currency* ``string``
 
 Event sent when an auction is started
 
 
 DUTCH-AUCTION-SALE-BOUGHT
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-sale-id* ``string`` *token-id* ``string`` *buy-price* ``decimal``
+sale-id* ``string`` *token-id* ``string`` *buy-price* ``decimal`` *currency* ``string``
 
 Event sent when a dutch auction sale is bought
 

@@ -95,6 +95,7 @@
 (expect "Event AUCTION-SALE-OFFER -> sale_id" (hash "auction-sale-1") (ev-analyzer.param "AUCTION-SALE-OFFER" 0))
 (expect "Event AUCTION-SALE-OFFER -> token_id" "t:LWZdYIxjht_J_PCA4RrThTdjD9VDCvkWabnh8tKNST8" (ev-analyzer.param "AUCTION-SALE-OFFER" 1))
 (expect "Event AUCTION-SALE-OFFER -> price" 10.0 (ev-analyzer.param "AUCTION-SALE-OFFER" 2))
+(expect "Event AUCTION-SALE-OFFER -> currency" "coin" (ev-analyzer.param "AUCTION-SALE-OFFER" 3))
 
 ; Verify that 0.1 has been deducted from the balance of Alice
 (expect "Balance of alice is 0.6 - 0.1" 0.5 (get-balance "t:LWZdYIxjht_J_PCA4RrThTdjD9VDCvkWabnh8tKNST8" "alice"))
@@ -128,7 +129,7 @@
 ; Check the events
 (ev-analyzer.store (env-events true))
 (expect "Bid Event is present" true (ev-analyzer.is-present "PLACE-BID"))
-(expect "Bid params" ["utRLLLbDcGyMnBcuPDjo-VaxR_65Wxv2v8EhoD9z4-E" "t:LWZdYIxjht_J_PCA4RrThTdjD9VDCvkWabnh8tKNST8" "bob" 10.0 ] (ev-analyzer.params "PLACE-BID"))
+(expect "Bid params" ["utRLLLbDcGyMnBcuPDjo-VaxR_65Wxv2v8EhoD9z4-E" "t:LWZdYIxjht_J_PCA4RrThTdjD9VDCvkWabnh8tKNST8" "bob" 10.0 "coin"] (ev-analyzer.params "PLACE-BID"))
 
 
 ; Verify that bob KDA account has been debited

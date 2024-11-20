@@ -4,6 +4,7 @@
   (use util-policies)
   (use ledger [NO-TIMEOUT create-account account-exist account-guard])
   (use free.util-time [is-past is-future from-now])
+  (use free.util-strings [to-string])
 
   ;-----------------------------------------------------------------------------
   ; Governance
@@ -14,17 +15,17 @@
   ;-----------------------------------------------------------------------------
   ; Capabilities and events
   ;-----------------------------------------------------------------------------
-  (defcap AUCTION-SALE-OFFER (sale-id:string token-id:string start-price:decimal)
+  (defcap AUCTION-SALE-OFFER (sale-id:string token-id:string start-price:decimal currency:string)
     @doc "Event sent when an auction is started"
     @event
     true)
 
-  (defcap PLACE-BID (sale-id:string token-id:string buyer:string price:decimal)
+  (defcap PLACE-BID (sale-id:string token-id:string buyer:string price:decimal currency:string)
     @doc "Event emitted after an external bid"
     @event
     true)
 
-  (defcap AUCTION-SALE-BOUGHT (sale-id:string token-id:string buy-price:decimal)
+  (defcap AUCTION-SALE-BOUGHT (sale-id:string token-id:string buy-price:decimal currency:string)
     @doc "Event sent when an auction has ended"
     @event
     true)
@@ -182,7 +183,7 @@
                                         'timeout: timeout,
                                         'enabled: true})
             ; Emit event always returns true
-            (emit-event (AUCTION-SALE-OFFER (pact-id) token-id start-price))))
+            (emit-event (AUCTION-SALE-OFFER (pact-id) token-id start-price (to-string currency)))))
         false))
   )
 
@@ -229,7 +230,7 @@
         (install-capability (currency::TRANSFER (auction-escrow (pact-id)) (ledger.escrow) buy-price))
         (currency::transfer-create (auction-escrow (pact-id)) (ledger.escrow) (ledger.escrow-guard) buy-price))
       ; Emit the event
-      (emit-event (AUCTION-SALE-BOUGHT (pact-id) token-id buy-price)))
+      (emit-event (AUCTION-SALE-BOUGHT (pact-id) token-id buy-price (to-string currency))))
   )
 
   (defun enforce-sale-buy:bool (token:object{token-info} buyer:string)
@@ -336,7 +337,7 @@
                                 'timeout: (compute-new-timeout timeout)})
 
       ; Emit the event
-      (emit-event (PLACE-BID sale-id token-id buyer new-price))
+      (emit-event (PLACE-BID sale-id token-id buyer new-price (to-string currency)))
       ; Return a nice looking string
       (+ "Bid placed for sale: " sale-id))
   )

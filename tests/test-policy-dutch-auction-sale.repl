@@ -95,7 +95,7 @@
 (expect "Event DUTCH-AUCTION-SALE-OFFER -> sale_id" (hash "fixed-sale-1") (ev-analyzer.param "DUTCH-AUCTION-SALE-OFFER" 0))
 (expect "Event DUTCH-AUCTION-SALE-OFFER -> token_id" "t:jH6cLnR-L_tehD874FGubaGQ0zx9BTxzlh8ENcXqWxc" (ev-analyzer.param "DUTCH-AUCTION-SALE-OFFER" 1))
 (expect "Event DUTCH-AUCTION-SALE-OFFER -> price" 100.0 (ev-analyzer.param "DUTCH-AUCTION-SALE-OFFER" 2))
-
+(expect "Event DUTCH-AUCTION-SALE-OFFER -> currency" "coin" (ev-analyzer.param "DUTCH-AUCTION-SALE-OFFER" 3))
 
 
 (expect-that "It should exist 1 active sale" (compose (length) (= 1)) (get-all-active-sales))
@@ -192,6 +192,7 @@
 (expect "Event DUTCH-AUCTION-SALE-BOUGHT -> sale_id" (hash "fixed-sale-1") (ev-analyzer.param "DUTCH-AUCTION-SALE-BOUGHT" 0))
 (expect "Event DUTCH-AUCTION-SALE-BOUGHT -> token_id" "t:jH6cLnR-L_tehD874FGubaGQ0zx9BTxzlh8ENcXqWxc" (ev-analyzer.param "DUTCH-AUCTION-SALE-BOUGHT" 1))
 (expect-that "Event DUTCH-AUCTION-SALE-BOUGHT -> price" (between 9.99 10.1) (ev-analyzer.param "DUTCH-AUCTION-SALE-BOUGHT" 2))
+(expect "Event DUTCH-AUCTION-SALE-BOUGHT -> currency" "coin" (ev-analyzer.param "DUTCH-AUCTION-SALE-BOUGHT" 3))
 
 ; Check the KDA balances
 (expect-that "Final balance should be 1005" (between 1009.99 1010.01) (coin.get-balance "alice"))

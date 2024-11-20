@@ -350,21 +350,21 @@ Events
 ^^^^^^
 AUCTION-SALE-OFFER
 ~~~~~~~~~~~~~~~~~~
-sale-id* ``string`` *token-id* ``string`` *start-price* ``decimal``
+sale-id* ``string`` *token-id* ``string`` *start-price* ``decimal`` *currency* ``string``
 
 Event sent when an auction is started
 
 
 PLACE-BID
 ~~~~~~~~~~~~~~~~
-*sale-id* ``string`` *token-id* ``string`` *buyer* ``string`` *price* ``decimal``
+*sale-id* ``string`` *token-id* ``string`` *buyer* ``string`` *price* ``decimal`` *currency* ``string``
 
 Event emitted when a bid is placed for the sale.
 
 
 AUCTION-SALE-BOUGHT
 ~~~~~~~~~~~~~~~~~~~
-sale-id* ``string`` *token-id* ``string`` *buy-price* ``decimal``
+sale-id* ``string`` *token-id* ``string`` *buy-price* ``decimal`` *currency* ``string``
 
 Event sent when an auction has ended
 

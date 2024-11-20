@@ -5,6 +5,7 @@
   (use ledger [NO-TIMEOUT account-guard])
   (use free.util-math [max])
   (use free.util-time [is-past is-future now])
+  (use free.util-strings [to-string])
 
   ;-----------------------------------------------------------------------------
   ; Governance
@@ -19,12 +20,12 @@
     @doc "Capability to scope a signature when withdrawing an infinite timeout sale"
     true)
 
-  (defcap DUTCH-AUCTION-SALE-OFFER (sale-id:string token-id:string start-price:decimal)
+  (defcap DUTCH-AUCTION-SALE-OFFER (sale-id:string token-id:string start-price:decimal currency:string)
     @doc "Event sent when a dutch auction sale is started"
     @event
     true)
 
-  (defcap DUTCH-AUCTION-SALE-BOUGHT (sale-id:string token-id:string buy-price:decimal)
+  (defcap DUTCH-AUCTION-SALE-BOUGHT (sale-id:string token-id:string buy-price:decimal currency:string)
     @doc "Event sent when a dutch auction sale is bought"
     @event
     true)
@@ -169,7 +170,7 @@
                                         'timeout: timeout,
                                         'enabled: true})
               ; Emit event always returns true
-              (emit-event (DUTCH-AUCTION-SALE-OFFER (pact-id) token-id start-price))))
+              (emit-event (DUTCH-AUCTION-SALE-OFFER (pact-id) token-id start-price (to-string currency)))))
             false))
   )
 
@@ -194,9 +195,9 @@
     (let ((buy-price (compute-price (pact-id))))
       ; First step to handle the buying part => Transfer the amount to the escrow account
       (with-read quotes (pact-id) {'currency:=currency:module{fungible-v2}}
-        (currency::transfer-create buyer (ledger.escrow) (ledger.escrow-guard) buy-price))
+        (currency::transfer-create buyer (ledger.escrow) (ledger.escrow-guard) buy-price)
         ; Emit the corresponding event
-      (emit-event (DUTCH-AUCTION-SALE-BOUGHT (pact-id) (at 'id token) buy-price)))
+        (emit-event (DUTCH-AUCTION-SALE-BOUGHT (pact-id) (at 'id token) buy-price (to-string currency)))))
   )
 
   (defun enforce-sale-buy:bool (token:object{token-info} buyer:string)
